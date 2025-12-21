@@ -1,0 +1,569 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>YouCanHeal — Dashboard</title>
+<style>
+:root{
+--bg: #fffaf0;
+--card:#fff;
+--accent:#00a89d;
+--muted:#6b6b6b;
+--accent-2:#ffc107;
+--text:#232323;
+--shadow: rgba(2,6,23,0.06);
+--border: rgba(0,0,0,0.03);
+}
+[data-theme="dark"]{
+--bg:#0f1720;
+--card:#1a2332;
+--accent:#8ad7cf;
+--muted:#9aa6b2;
+--accent-2:#f6c85f;
+--text:#e6eef0;
+--shadow: rgba(0,0,0,0.3);
+--border: rgba(255,255,255,0.1);
+}
+*{box-sizing:border-box}
+body{
+margin:0;
+font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+background:linear-gradient(180deg,var(--bg), #fff3e6);
+color:var(--text);
+transition:background 300ms ease, color 300ms ease;
+min-height:100vh;
+}
+[data-theme="dark"] body{
+background:linear-gradient(180deg,var(--bg), #1a2332);
+}
+header{
+display:flex; align-items:center; justify-content:space-between;
+padding:16px 24px; background:linear-gradient(90deg,var(--accent), #006b62);
+color:white;
+position:sticky; top:0; z-index:20;
+box-shadow:0 6px 18px var(--shadow);
+}
+header .left {display:flex; gap:14px; align-items:center}
+header h1{margin:0;font-size:1.2rem}
+header nav a{color:rgba(255,255,255,0.95); margin-left:12px; text-decoration:none; font-weight:600; transition:color 0.2s}
+header nav a:hover{color:white; text-decoration:underline}
+.container{max-width:1100px;margin:28px auto;padding:0 18px;display:grid;grid-template-columns:repeat(12,1fr);gap:20px}
+.card{
+background:var(--card); 
+border-radius:14px; 
+padding:18px; 
+box-shadow:0 8px 22px var(--shadow); 
+transition:transform .18s ease, box-shadow .18s ease; 
+border:1px solid var(--border)
+}
+.card:hover{transform:translateY(-6px); box-shadow:0 12px 30px var(--shadow)}
+.big {grid-column: span 8;}
+.side {grid-column: span 4;}
+@media(max-width:900px){ .big, .side{grid-column:span 12} }
+
+h2{margin:0 0 10px 0; color:var(--accent-2); font-size:1.3em}
+.muted{color:var(--muted); font-size:0.95rem}
+.steps{display:flex;align-items:center;gap:12px}
+.steps .num{font-size:1.6rem; font-weight:700; color:var(--accent)}
+.btn{
+background:var(--accent-2); 
+color:#fff; 
+border:none; 
+padding:8px 12px; 
+border-radius:8px; 
+cursor:pointer; 
+font-weight:700;
+transition:background 0.2s ease;
+}
+.btn:hover{background:#e6ae00; transform:translateY(-1px)}
+.btn:disabled{background:var(--muted); cursor:not-allowed; transform:none}
+.smallbtn{
+background:transparent;
+border:1px solid var(--accent-2); 
+color:var(--accent-2); 
+padding:6px 8px; 
+border-radius:8px; 
+cursor:pointer;
+transition:all 0.2s ease;
+}
+.smallbtn:hover{background:var(--accent-2); color:white}
+
+/* Enhanced chat styling */
+#chatBox{
+height:280px; 
+overflow:auto; 
+padding:12px; 
+background:linear-gradient(180deg,var(--bg),var(--card)); 
+border-radius:12px; 
+margin-bottom:12px;
+border:1px solid var(--border);
+scrollbar-width:thin;
+}
+#chatBox::-webkit-scrollbar{width:6px}
+#chatBox::-webkit-scrollbar-track{background:transparent}
+#chatBox::-webkit-scrollbar-thumb{background:var(--muted); border-radius:3px}
+
+.msg{
+padding:10px 12px; 
+border-radius:12px; 
+margin-bottom:10px; 
+max-width:85%;
+font-size:0.95rem;
+line-height:1.4;
+animation:slideIn 0.3s ease;
+}
+@keyframes slideIn{
+from{opacity:0; transform:translateY(10px)}
+to{opacity:1; transform:translateY(0)}
+}
+.msg.user{
+background:var(--accent); 
+color:white; 
+margin-left:auto;
+border-bottom-right-radius:4px;
+}
+.msg.ai{
+background:var(--card); 
+border:1px solid var(--border);
+border-bottom-left-radius:4px;
+}
+.msg.crisis{
+border-left:4px solid #ff6b6b;
+background:#fff5f5;
+color:#721c24;
+font-weight:500;
+}
+[data-theme="dark"] .msg.crisis{
+background:#2d1b1e;
+color:#ff9999;
+}
+.chat-row{display:flex; gap:10px; align-items:center}
+.chat-row input{
+flex:1;
+padding:10px;
+border-radius:10px;
+border:1px solid var(--border);
+background:var(--card);
+color:var(--text);
+transition:border-color 0.2s;
+}
+.chat-row input:focus{border-color:var(--accent); outline:none}
+
+/* dark mode controls */
+.controls{display:flex; gap:10px; align-items:center}
+.theme-toggle{
+padding:8px 12px; 
+border-radius:8px; 
+cursor:pointer; 
+background:rgba(255,255,255,0.1); 
+color:white; 
+border:1px solid rgba(255,255,255,0.2);
+transition:background 0.2s ease;
+font-size:0.9rem;
+}
+.theme-toggle:hover{background:rgba(255,255,255,0.2)}
+
+/* Enhanced mood buttons */
+.mood-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin-top:12px}
+.mood-btn{
+padding:8px;
+border:1px solid var(--border);
+background:var(--card);
+border-radius:8px;
+cursor:pointer;
+transition:all 0.2s ease;
+font-size:1.2rem;
+display:flex;
+align-items:center;
+justify-content:center;
+gap:4px;
+}
+.mood-btn:hover{transform:scale(1.05); border-color:var(--accent)}
+
+/* Enhanced step counter */
+.step-input{
+display:flex;
+gap:8px;
+margin-top:12px;
+}
+.step-input input{
+flex:1;
+padding:8px;
+border:1px solid var(--border);
+border-radius:6px;
+background:var(--card);
+color:var(--text);
+}
+
+/* Crisis support card */
+.crisis-card{
+border-left:4px solid #ff6b6b;
+background:linear-gradient(135deg, #fff5f5, #ffebee);
+}
+[data-theme="dark"] .crisis-card{
+background:linear-gradient(135deg, #2d1b1e, #3d2b2e);
+}
+
+/* Loading state */
+.loading{
+opacity:0.7;
+font-style:italic;
+}
+
+footer{margin-top:28px;text-align:center;color:var(--muted);padding:20px 0;border-top:1px solid var(--border)}
+
+/* Responsive improvements */
+@media(max-width:600px){
+header{padding:12px 16px}
+.container{padding:0 12px; gap:16px}
+.card{padding:14px}
+.controls{gap:6px}
+.theme-toggle{padding:6px 8px; font-size:0.8rem}
+}
+</style>
+</head>
+<body>
+<header>
+<div class="left">
+<h1>🌼 YouCanHeal</h1>
+<nav>
+<a href="#boost">Boost</a>
+<a href="#steps">Steps</a>
+<a href="#luna">Luna</a>
+<a href="#coping">Coping</a>
+</nav>
+</div>
+<div class="controls">
+<div class="muted" id="username">Guest</div>
+<button class="theme-toggle" id="themeToggle">🌙 Dark</button>
+<button class="smallbtn" id="signOut">Sign Out</button>
+</div>
+</header>
+
+<div class="container">
+<!-- left/big column -->
+<div class="card big" id="boostCard">
+<h2>🌸 Today's Gentle Boost</h2>
+<p id="boostText" class="muted">Loading your boost…</p>
+<div style="margin-top:12px">
+<button class="btn" id="getBoostBtn">Get Today's Boost</button>
+</div>
+</div>
+
+<div class="card side" id="stepsCard">
+<h2>🚶 Daily Steps</h2>
+<div class="steps">
+<div>
+<div class="num" id="stepsNum">0</div>
+<div class="muted">steps today</div>
+</div>
+</div>
+<div class="step-input">
+<input type="number" id="addStepsInput" placeholder="Add steps" min="1" />
+<button class="btn" onclick="addSteps()">Add</button>
+</div>
+</div>
+
+<div class="card big" id="lunaCard">
+<h2>🌙 Chat with Luna</h2>
+<div id="chatBox">
+<div class="msg ai">
+<strong>Luna:</strong> Hi there 💛 I'm here to listen and support you. How are you feeling today?
+</div>
+</div>
+
+<div class="chat-row">
+<input id="chatInput" placeholder="Say hi to Luna..." />
+<button class="btn" id="sendBtn">Send</button>
+<button class="smallbtn" id="clearBtn" style="margin-left:6px">Clear</button>
+</div>
+<div style="margin-top:8px" class="muted">Luna is an empathetic companion and does not provide medical advice.</div>
+</div>
+
+<div class="card side" id="moodCard">
+<h2>💭 Mood Checker</h2>
+<div class="mood-grid">
+<button class="mood-btn" onclick="logMood('Happy')">😊 Happy</button>
+<button class="mood-btn" onclick="logMood('Okay')">😐 Okay</button>
+<button class="mood-btn" onclick="logMood('Sad')">😔 Sad</button>
+<button class="mood-btn" onclick="logMood('Anxious')">😰 Anxious</button>
+</div>
+<div style="margin-top:12px; font-size:0.9rem" id="moodLog">No moods logged yet.</div>
+</div>
+
+<div class="card big" id="copingCard">
+<h2>🌿 Coping Library</h2>
+<ul style="line-height:1.6">
+<li><strong>Deep breathing</strong> — 4-4-4 breathing for 5 cycles.</li>
+<li><strong>5-4-3-2-1 grounding</strong> — notice senses to calm anxiety.</li>
+<li><strong>Mini gratitude</strong> — write 3 small things you noticed today.</li>
+<li><strong>Gentle movement</strong> — stretch your arms or take a short walk.</li>
+<li><strong>Self-compassion</strong> — speak to yourself like a dear friend.</li>
+</ul>
+</div>
+
+<!-- Crisis Support Card -->
+<div class="card side crisis-card" id="crisisCard">
+<h2>🆘 Crisis Support</h2>
+<div style="font-size:0.9rem; line-height:1.5">
+<p><strong>If you're in crisis:</strong></p>
+<ul style="margin:8px 0; padding-left:20px">
+<li><strong>Emergency:</strong> 911 (US) / 999 (UK) / 112 (EU)</li>
+<li><strong>Crisis Text:</strong> Text HOME to 741741</li>
+<li><strong>Suicide Prevention:</strong> 988 (US) / 116 123 (UK)</li>
+</ul>
+<p style="font-size:0.85rem; color:var(--muted)">You matter and help is available 💛</p>
+</div>
+</div>
+</div>
+
+<footer>
+&copy; <span id="year"></span> YouCanHeal — Not a substitute for medical care. If in crisis, call local emergency services.
+</footer>
+
+<div id="cookie-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;background:#222;color:#fff;padding:12px;text-align:center;font-size:0.9rem;">
+🍪 We use cookies to improve your experience. By continuing, you agree to our <a href="#" style="color:#ffc107;">cookie policy</a>.
+<button id="cookie-accept" style="margin-left:10px;padding:4px 10px;border:none;border-radius:6px;background:#ffc107;color:#000;font-weight:bold;cursor:pointer;">OK</button>
+</div>
+
+<script>
+// UI state
+document.getElementById('year').textContent = new Date().getFullYear();
+
+// Dark mode toggle (persist)
+const themeToggle = document.getElementById('themeToggle');
+function applyTheme(t){
+if(t === 'dark') {
+document.documentElement.setAttribute('data-theme','dark');
+themeToggle.textContent = '☀️ Light';
+} else {
+document.documentElement.removeAttribute('data-theme');
+themeToggle.textContent = '🌙 Dark';
+}
+localStorage.setItem('yc_theme', t);
+}
+// init theme
+const saved = localStorage.getItem('yc_theme') || 'light';
+applyTheme(saved);
+themeToggle.addEventListener('click', () => {
+const cur = localStorage.getItem('yc_theme') || 'light';
+const next = cur === 'dark' ? 'light' : 'dark';
+applyTheme(next);
+});
+
+// Enhanced boost pool
+const boosts = [
+"Take 3 deep breaths and notice how your chest moves 🌸",
+"Step outside for 2 minutes and notice one small detail of nature 🌿",
+"Write down one small win from today — even if tiny ✨",
+"Make a warm drink and slowly enjoy the first sip ☕",
+"Send a kind message to someone you care about 💛",
+"Stretch your arms above your head and breathe deeply 🧘‍♀️",
+"Look in the mirror and say one kind thing to yourself 🌟",
+"Tidy up one small area — just your desk or a drawer 🧹",
+"Put on your favorite song and move gently for 1 minute 🎵",
+"Take a photo of something beautiful you notice right now 📸"
+];
+function getBoost(){
+const b = boosts[Math.floor(Math.random()*boosts.length)];
+document.getElementById('boostText').textContent = b;
+// Add gentle animation
+const el = document.getElementById('boostText');
+el.style.opacity = '0';
+setTimeout(() => {
+el.style.transition = 'opacity 0.5s ease';
+el.style.opacity = '1';
+}, 100);
+}
+document.getElementById('getBoostBtn').addEventListener('click', getBoost);
+
+// Enhanced steps with local storage
+let steps = parseInt(localStorage.getItem('dailySteps')) || 0;
+document.getElementById('stepsNum').textContent = steps;
+
+function addSteps(){
+const v = Number(document.getElementById('addStepsInput').value || 0);
+if (v <= 0) {
+alert('Please enter a positive number of steps');
+return;
+}
+steps += v;
+document.getElementById('stepsNum').textContent = steps;
+document.getElementById('addStepsInput').value = '';
+localStorage.setItem('dailySteps', steps);
+
+// Celebration for milestones
+if (steps >= 10000) {
+setTimeout(() => alert('🎉 Amazing! You hit 10,000 steps!'), 100);
+} else if (steps >= 5000) {
+setTimeout(() => alert('🌟 Great job! You reached 5,000 steps!'), 100);
+}
+}
+
+// Enhanced mood logger with local storage
+function logMood(mood){
+const time = new Date().toLocaleTimeString();
+document.getElementById('moodLog').textContent = `Last: ${mood} (${time})`;
+
+// Save to local storage
+const today = new Date().toDateString();
+const moodData = JSON.parse(localStorage.getItem('moodHistory')) || {};
+if (!moodData[today]) moodData[today] = [];
+moodData[today].push({ mood, time: new Date().toISOString() });
+localStorage.setItem('moodHistory', JSON.stringify(moodData));
+
+// Visual feedback
+const buttons = document.querySelectorAll('.mood-btn');
+buttons.forEach(btn => btn.style.transform = 'scale(1)');
+event.target.style.transform = 'scale(1.1)';
+setTimeout(() => event.target.style.transform = 'scale(1)', 200);
+}
+
+// Enhanced chat functionality
+const chatBox = document.getElementById('chatBox');
+const chatInput = document.getElementById('chatInput');
+const sendBtn = document.getElementById('sendBtn');
+const clearBtn = document.getElementById('clearBtn');
+
+function appendMsg(role, text, isCrisis = false){
+const div = document.createElement('div');
+div.className = 'msg ' + (role === 'user' ? 'user' : 'ai') + (isCrisis ? ' crisis' : '');
+div.innerHTML = `<strong>${role === 'user' ? 'You' : 'Luna'}:</strong> ${text.replace(/\n/g, '<br>')}`;
+chatBox.appendChild(div);
+chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+// Initialize session on load
+fetch('/api/session', { 
+method:'POST', 
+headers:{'Content-Type':'application/json'}, 
+body: JSON.stringify({}) 
+})
+.then(r=>r.json())
+.then(d=>{
+if(d.user) document.getElementById('username').textContent = d.user.email || 'You';
+})
+.catch(()=>{
+console.log('Session init failed, continuing in demo mode');
+});
+
+// Enhanced send message with better error handling
+async function sendMessage(){
+const text = chatInput.value.trim();
+if(!text) return;
+
+appendMsg('user', text);
+chatInput.value = '';
+sendBtn.disabled = true;
+sendBtn.textContent = 'Sending...';
+
+// Add typing indicator
+const typingDiv = document.createElement('div');
+typingDiv.className = 'msg ai loading';
+typingDiv.innerHTML = '<strong>Luna:</strong> <em>typing...</em>';
+chatBox.appendChild(typingDiv);
+chatBox.scrollTop = chatBox.scrollHeight;
+
+try {
+const resp = await fetch('/api/chat', {
+method: 'POST',
+headers: {'Content-Type':'application/json'},
+body: JSON.stringify({ message: text })
+});
+
+// Remove typing indicator
+typingDiv.remove();
+
+const data = await resp.json();
+if (data?.reply) {
+appendMsg('assistant', data.reply, data.isCrisisResponse);
+} else {
+appendMsg('assistant', 'Sorry — Luna is having trouble. Try again later.');
+}
+} catch (err) {
+console.error(err);
+typingDiv.remove();
+appendMsg('assistant', 'Network error. Please try again later.');
+} finally {
+sendBtn.disabled = false;
+sendBtn.textContent = 'Send';
+}
+}
+
+// Clear chat
+async function clearChat(){
+try {
+await fetch('/api/chat/reset', { method:'POST' });
+chatBox.innerHTML = '<div class="msg ai"><strong>Luna:</strong> Hi there 💛 I\'m here to listen and support you. How are you feeling today?</div>';
+} catch (err) {
+console.error('Clear chat failed:', err);
+}
+}
+
+// Event listeners
+sendBtn.addEventListener('click', sendMessage);
+clearBtn.addEventListener('click', clearChat);
+chatInput.addEventListener('keydown', e => { 
+if(e.key === 'Enter' && !e.shiftKey) {
+e.preventDefault();
+sendMessage();
+}
+});
+
+// Enhanced sign out
+document.getElementById('signOut').addEventListener('click', async ()=>{
+try {
+await fetch('/api/logout', { method:'POST' });
+} catch (err) {
+console.error('Logout error:', err);
+}
+window.location.href = '/';
+});
+
+// Auto-focus chat input
+chatInput.focus();
+
+// Initial boost on load
+setTimeout(getBoost, 500);
+
+// Load mood history on startup
+window.addEventListener('load', () => {
+const today = new Date().toDateString();
+const moodData = JSON.parse(localStorage.getItem('moodHistory')) || {};
+const todayMoods = moodData[today];
+if (todayMoods && todayMoods.length > 0) {
+const lastMood = todayMoods[todayMoods.length - 1];
+const time = new Date(lastMood.time).toLocaleTimeString();
+document.getElementById('moodLog').textContent = `Last: ${lastMood.mood} (${time})`;
+}
+});
+
+// Cookie consent banner
+if(!localStorage.getItem('yc_cookie')){
+const banner = document.getElementById('cookie-banner');
+banner.style.display='block';
+document.getElementById('cookie-accept').onclick=()=>{
+localStorage.setItem('yc_cookie','true');
+banner.style.display='none';
+};
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', (e) => {
+if (e.ctrlKey || e.metaKey) {
+switch(e.key) {
+case 'd':
+e.preventDefault();
+themeToggle.click();
+break;
+case 'k':
+e.preventDefault();
+clearChat();
+break;
+}
+}
+});
+</script>
+</body>
+</html>

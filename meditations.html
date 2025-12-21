@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YouCanHeal • Meditations</title>
+  <link rel="icon" type="image/png" href="images/youcanheal-logo.png">
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --accent: #10b981;
+      --accent-2: #3b82f6;
+      --accent-3: #9B59B6;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --hover: #f3f4f6;
+      --button: var(--accent-2);
+      --button-hover: #6AA6EA;
+    }
+    [data-theme="dark"] {
+      --bg: #121212;
+      --card: #1E1E1E;
+      --accent: #A3D3B8;
+      --accent-2: #4A90E2;
+      --accent-3: #9B59B6;
+      --text: #E0E0E0;
+      --muted: #B0B0B0;
+      --border: #2A2A2A;
+      --hover: #1A1A1A;
+      --button: #4A90E2;
+      --button-hover: #6AA6EA;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: linear-gradient(135deg, var(--bg) 0%, var(--hover) 100%);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 24px;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+      color: white;
+      position: sticky; top: 0; z-index: 10;
+    }
+    .logo { height: 40px; filter: drop-shadow(0 0 8px rgba(16,185,129,.35)); }
+    nav a { color: white; text-decoration: none; margin-left: 16px; font-weight: 600; }
+    .theme-toggle { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 8px 12px; border-radius: 8px; cursor: pointer; }
+
+    .wrap { max-width: 1100px; margin: 26px auto; padding: 0 18px; display: grid; grid-template-columns: 1fr 340px; gap: 20px; }
+    @media (max-width: 900px) { .wrap { grid-template-columns: 1fr; } }
+
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 18px; box-shadow: 0 4px 16px rgba(16,185,129,.08); }
+    h2 { margin: 0 0 10px 0; font-size: 1.25rem; font-weight: 700; }
+    .muted { color: var(--muted); }
+
+    .list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    @media (max-width: 700px) { .list { grid-template-columns: 1fr; } }
+
+    .track { display: flex; gap: 10px; align-items: center; padding: 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--card); cursor: pointer; transition: transform .15s ease, box-shadow .2s ease; }
+    .track:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(16,185,129,.12); border-color: var(--accent); }
+    .track .play { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; background: var(--accent); color: white; font-weight: 700; }
+    .meta { display: grid; }
+    .title { font-weight: 600; }
+    .by { font-size: .85rem; color: var(--muted); }
+
+    .player { position: sticky; top: 84px; }
+    .now { font-size: .95rem; margin-bottom: 8px; color: var(--muted); }
+    .big { font-weight: 700; color: var(--text); }
+    .credits { font-size: .8rem; color: var(--muted); margin-top: 10px; }
+  .btn { background: var(--button); color: white; border: 0; padding: 10px 14px; border-radius: 10px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 14px rgba(74,144,226,.25); }
+  .btn:hover { background: var(--button-hover); box-shadow: 0 6px 18px rgba(74,144,226,.35); }
+  </style>
+</head>
+<body data-theme="light">
+  <header>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <img class="logo" src="images/youcanheal-logo.png" alt="YouCanHeal">
+      <strong>Meditations</strong>
+    </div>
+    <nav>
+      <a href="/dashboard.html">Dashboard</a>
+      <a href="/index.html">Sign In</a>
+      <button class="theme-toggle" id="themeToggle">🌙 Dark</button>
+    </nav>
+  </header>
+
+  <div class="wrap">
+    <main class="card">
+      <h2>✨ Guided Meditations & Ambient</h2>
+      <p class="muted">Soft, soothing tracks to relax, focus, or drift to sleep. Tap any track to start playing.</p>
+
+      <h3 style="margin:16px 0 8px 0">Meditations</h3>
+      <div id="meditations" class="list"></div>
+      
+      <h3 style="margin:18px 0 8px 0">White Noise & Sleep</h3>
+      <div id="white-noise" class="list"></div>
+    </main>
+    
+    <aside class="card player">
+      <div class="now">Now Playing</div>
+      <div class="big" id="nowTitle">—</div>
+      <div class="muted" id="nowBy">—</div>
+      <audio id="audio" controls style="width:100%; margin-top:12px;">
+        Your browser does not support the audio element.
+      </audio>
+      <div class="credits" id="credits"></div>
+    </aside>
+  </div>
+
+  <script>
+    // Theme toggle
+    const themeToggle = document.getElementById('themeToggle');
+    function applyTheme(theme) {
+      document.body.setAttribute('data-theme', theme === 'dark' ? 'dark' : 'light');
+      themeToggle.textContent = theme === 'dark' ? '☀️ Light' : '🌙 Dark';
+      localStorage.setItem('yc_theme', theme);
+    }
+    applyTheme(localStorage.getItem('yc_theme') || 'light');
+    themeToggle.addEventListener('click', () => {
+      applyTheme((localStorage.getItem('yc_theme') || 'light') === 'dark' ? 'light' : 'dark');
+    });
+
+    // Build playlist from manifest
+    const audioEl = document.getElementById('audio');
+    const nowTitle = document.getElementById('nowTitle');
+    const nowBy = document.getElementById('nowBy');
+    const credits = document.getElementById('credits');
+
+    function mkItem(track) {
+      const div = document.createElement('div');
+      div.className = 'track';
+      div.innerHTML = `<div class="play">▶</div>
+        <div class="meta">
+          <span class="title">${track.label}</span>
+          <span class="by">by ${track.author}</span>
+        </div>`;
+      div.onclick = () => playTrack(track);
+      return div;
+    }
+
+    function playTrack(t) {
+      audioEl.src = t.file;
+      audioEl.play().catch(()=>{});
+      nowTitle.textContent = t.label;
+      nowBy.textContent = `by ${t.author}`;
+      credits.innerHTML = `Source: <a href="${t.source}" target="_blank">${t.source}</a> • License: ${t.license}`;
+    }
+
+    fetch('media/manifest.json')
+      .then(r => r.json())
+      .then(manifest => {
+        const mWrap = document.getElementById('meditations');
+        const wWrap = document.getElementById('white-noise');
+        manifest.meditations.forEach(t => mWrap.appendChild(mkItem(t)));
+        manifest.whiteNoises.forEach(t => wWrap.appendChild(mkItem(t)));
+        // Autoplay first meditation
+        if (manifest.meditations[0]) playTrack(manifest.meditations[0]);
+      })
+      .catch(err => {
+        const mWrap = document.getElementById('meditations');
+        mWrap.innerHTML = `<div class="muted">Failed to load tracks. Please refresh.</div>`;
+        console.error('Manifest load error', err);
+      });
+  </script>
+</body>
+</html>
