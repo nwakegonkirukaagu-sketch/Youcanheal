@@ -7,12 +7,16 @@
   <meta http-equiv="Content-Security-Policy"
 content="
 default-src 'self';
-script-src 'self' https://cdn.jsdelivr.net https://www.paypal.com https://*.supabase.co;
-style-src 'self' 'unsafe-inline';
-img-src 'self' data:;
-media-src 'self';
-connect-src 'self' https://*.supabase.co;
-frame-src https://www.paypal.com;
+base-uri 'self';
+object-src 'none';
+frame-ancestors 'self';
+img-src 'self' data: https:;
+style-src 'self' 'unsafe-inline' https:;
+script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://www.paypal.com https://www.sandbox.paypal.com https://*.supabase.co;
+connect-src 'self' https://*.supabase.co https://www.paypal.com https://www.sandbox.paypal.com https://api.paypal.com https://www.paypalobjects.com;
+frame-src https://www.paypal.com https://www.sandbox.paypal.com;
+media-src 'self' https:;
+upgrade-insecure-requests;
 ">
 
   <title>YouCanHeal — Welcome</title>
@@ -41,24 +45,25 @@ frame-src https://www.paypal.com;
       --button-hover: #6AA6EA;
     }
 
-    body.login-page {
-      background-image: url("images/youcanheal-bg.png");
-      background-size: cover;
-      background-position: center;
-      background-attachment: fixed;
-      color: var(--text);
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
       min-height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
-      font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial;
-      margin: 0;
+
+      /* ✅ LOCKED BACKGROUND IMAGE */
+      background-image: url("/images/youcanheal-bg.png");
+      background-size: cover;
+      background-position: center center;
+      background-repeat: no-repeat;
     }
 
     [data-theme="dark"] body.login-page {
       background-image:
         linear-gradient(135deg, rgba(0,0,0,0.5), rgba(0,0,0,0.7)),
-        url("images/youcanheal-bg.png");
+        url("/images/youcanheal-bg.png");
     }
 
     .login-box {
