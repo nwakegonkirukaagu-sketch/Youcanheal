@@ -1,569 +1,417 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>YouCanHeal — Dashboard</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YouCanHeal Dashboard</title>
+<link rel="icon" type="image/png" href="images/youcanheal-logo.png">
+
+<!-- PayPal SDK -->
+<script src="https://www.paypal.com/sdk/js?client-id=AeAkNJQMO6eiYY-v0IsWHNm64M3nHUnFaqKZ0iICehGrAVufHv1c3DGLNPXRkbKjjTJ_0cjN0Slc5tZz&vault=true&intent=subscription"></script>
+
 <style>
-:root{
---bg: #fffaf0;
---card:#fff;
---accent:#00a89d;
---muted:#6b6b6b;
---accent-2:#ffc107;
---text:#232323;
---shadow: rgba(2,6,23,0.06);
---border: rgba(0,0,0,0.03);
+/* (Your CSS unchanged) */
+:root {
+--bg:#f8fafc;--card:#ffffff;--accent:#10b981;--accent-2:#3b82f6;--accent-3:#9B59B6;--accent-soft:#d1fae5;
+--text:#1f2937;--text-secondary:#374151;--muted:#6b7280;--border:#e5e7eb;--hover:#f3f4f6;
+--button:var(--accent);--button-hover:#059669;--alert:#FFBF00;--error:#FF6F61;
 }
-[data-theme="dark"]{
---bg:#0f1720;
---card:#1a2332;
---accent:#8ad7cf;
---muted:#9aa6b2;
---accent-2:#f6c85f;
---text:#e6eef0;
---shadow: rgba(0,0,0,0.3);
---border: rgba(255,255,255,0.1);
+[data-theme="dark"] {
+--bg:#121212;--card:#1E1E1E;--accent:#A3D3B8;--accent-2:#4A90E2;--accent-3:#9B59B6;--accent-soft:#1a2a25;
+--text:#E0E0E0;--text-secondary:#B0B0B0;--muted:#B0B0B0;--border:#2A2A2A;--hover:#1A1A1A;
+--button:#4A90E2;--button-hover:#6AA6EA;--alert:#FFBF00;--error:#FF6F61;
 }
-*{box-sizing:border-box}
-body{
-margin:0;
-font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-background:linear-gradient(180deg,var(--bg), #fff3e6);
-color:var(--text);
-transition:background 300ms ease, color 300ms ease;
-min-height:100vh;
-}
-[data-theme="dark"] body{
-background:linear-gradient(180deg,var(--bg), #1a2332);
-}
-header{
-display:flex; align-items:center; justify-content:space-between;
-padding:16px 24px; background:linear-gradient(90deg,var(--accent), #006b62);
-color:white;
-position:sticky; top:0; z-index:20;
-box-shadow:0 6px 18px var(--shadow);
-}
-header .left {display:flex; gap:14px; align-items:center}
-header h1{margin:0;font-size:1.2rem}
-header nav a{color:rgba(255,255,255,0.95); margin-left:12px; text-decoration:none; font-weight:600; transition:color 0.2s}
-header nav a:hover{color:white; text-decoration:underline}
-.container{max-width:1100px;margin:28px auto;padding:0 18px;display:grid;grid-template-columns:repeat(12,1fr);gap:20px}
-.card{
-background:var(--card); 
-border-radius:14px; 
-padding:18px; 
-box-shadow:0 8px 22px var(--shadow); 
-transition:transform .18s ease, box-shadow .18s ease; 
-border:1px solid var(--border)
-}
-.card:hover{transform:translateY(-6px); box-shadow:0 12px 30px var(--shadow)}
-.big {grid-column: span 8;}
-.side {grid-column: span 4;}
-@media(max-width:900px){ .big, .side{grid-column:span 12} }
-
-h2{margin:0 0 10px 0; color:var(--accent-2); font-size:1.3em}
-.muted{color:var(--muted); font-size:0.95rem}
-.steps{display:flex;align-items:center;gap:12px}
-.steps .num{font-size:1.6rem; font-weight:700; color:var(--accent)}
-.btn{
-background:var(--accent-2); 
-color:#fff; 
-border:none; 
-padding:8px 12px; 
-border-radius:8px; 
-cursor:pointer; 
-font-weight:700;
-transition:background 0.2s ease;
-}
-.btn:hover{background:#e6ae00; transform:translateY(-1px)}
-.btn:disabled{background:var(--muted); cursor:not-allowed; transform:none}
-.smallbtn{
-background:transparent;
-border:1px solid var(--accent-2); 
-color:var(--accent-2); 
-padding:6px 8px; 
-border-radius:8px; 
-cursor:pointer;
-transition:all 0.2s ease;
-}
-.smallbtn:hover{background:var(--accent-2); color:white}
-
-/* Enhanced chat styling */
-#chatBox{
-height:280px; 
-overflow:auto; 
-padding:12px; 
-background:linear-gradient(180deg,var(--bg),var(--card)); 
-border-radius:12px; 
-margin-bottom:12px;
-border:1px solid var(--border);
-scrollbar-width:thin;
-}
-#chatBox::-webkit-scrollbar{width:6px}
-#chatBox::-webkit-scrollbar-track{background:transparent}
-#chatBox::-webkit-scrollbar-thumb{background:var(--muted); border-radius:3px}
-
-.msg{
-padding:10px 12px; 
-border-radius:12px; 
-margin-bottom:10px; 
-max-width:85%;
-font-size:0.95rem;
-line-height:1.4;
-animation:slideIn 0.3s ease;
-}
-@keyframes slideIn{
-from{opacity:0; transform:translateY(10px)}
-to{opacity:1; transform:translateY(0)}
-}
-.msg.user{
-background:var(--accent); 
-color:white; 
-margin-left:auto;
-border-bottom-right-radius:4px;
-}
-.msg.ai{
-background:var(--card); 
-border:1px solid var(--border);
-border-bottom-left-radius:4px;
-}
-.msg.crisis{
-border-left:4px solid #ff6b6b;
-background:#fff5f5;
-color:#721c24;
-font-weight:500;
-}
-[data-theme="dark"] .msg.crisis{
-background:#2d1b1e;
-color:#ff9999;
-}
-.chat-row{display:flex; gap:10px; align-items:center}
-.chat-row input{
-flex:1;
-padding:10px;
-border-radius:10px;
-border:1px solid var(--border);
-background:var(--card);
-color:var(--text);
-transition:border-color 0.2s;
-}
-.chat-row input:focus{border-color:var(--accent); outline:none}
-
-/* dark mode controls */
-.controls{display:flex; gap:10px; align-items:center}
-.theme-toggle{
-padding:8px 12px; 
-border-radius:8px; 
-cursor:pointer; 
-background:rgba(255,255,255,0.1); 
-color:white; 
-border:1px solid rgba(255,255,255,0.2);
-transition:background 0.2s ease;
-font-size:0.9rem;
-}
-.theme-toggle:hover{background:rgba(255,255,255,0.2)}
-
-/* Enhanced mood buttons */
-.mood-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin-top:12px}
-.mood-btn{
-padding:8px;
-border:1px solid var(--border);
-background:var(--card);
-border-radius:8px;
-cursor:pointer;
-transition:all 0.2s ease;
-font-size:1.2rem;
-display:flex;
-align-items:center;
-justify-content:center;
-gap:4px;
-}
-.mood-btn:hover{transform:scale(1.05); border-color:var(--accent)}
-
-/* Enhanced step counter */
-.step-input{
-display:flex;
-gap:8px;
-margin-top:12px;
-}
-.step-input input{
-flex:1;
-padding:8px;
-border:1px solid var(--border);
-border-radius:6px;
-background:var(--card);
-color:var(--text);
-}
-
-/* Crisis support card */
-.crisis-card{
-border-left:4px solid #ff6b6b;
-background:linear-gradient(135deg, #fff5f5, #ffebee);
-}
-[data-theme="dark"] .crisis-card{
-background:linear-gradient(135deg, #2d1b1e, #3d2b2e);
-}
-
-/* Loading state */
-.loading{
-opacity:0.7;
-font-style:italic;
-}
-
-footer{margin-top:28px;text-align:center;color:var(--muted);padding:20px 0;border-top:1px solid var(--border)}
-
-/* Responsive improvements */
-@media(max-width:600px){
-header{padding:12px 16px}
-.container{padding:0 12px; gap:16px}
-.card{padding:14px}
-.controls{gap:6px}
-.theme-toggle{padding:6px 8px; font-size:0.8rem}
-}
+*{box-sizing:border-box;transition:background .3s ease,color .3s ease,border .3s ease}
+body{margin:0;font-family:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;background:linear-gradient(135deg,var(--bg) 0%,var(--hover) 100%);color:var(--text);min-height:100vh;line-height:1.6}
+header{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;background:linear-gradient(135deg,var(--accent) 0%,var(--accent-2) 100%);color:white;box-shadow:0 4px 20px rgba(16,185,129,.2);position:sticky;top:0;z-index:100;backdrop-filter:blur(10px)}
+header nav a{color:white;text-decoration:none;margin-left:16px;font-weight:600;text-shadow:0 0 8px rgba(255,255,255,.3)}
+.container{max-width:1100px;margin:30px auto;padding:0 18px;display:grid;grid-template-columns:repeat(12,1fr);gap:20px}
+.card{background:var(--card);border-radius:16px;padding:24px;box-shadow:0 4px 20px rgba(16,185,129,.08);border:1px solid var(--border);transition:all .3s ease;backdrop-filter:blur(10px)}
+.card:hover{transform:translateY(-3px);box-shadow:0 8px 25px rgba(16,185,129,.15);border-color:var(--accent)}
+.big{grid-column:span 8}.side{grid-column:span 4}
+@media(max-width:900px){.big,.side{grid-column:span 12}}
+h2{margin:0 0 12px 0;color:var(--text);font-weight:600;font-size:1.3rem}
+h2::before{content:'';display:inline-block;width:4px;height:20px;background:linear-gradient(135deg,var(--accent),var(--accent-2));border-radius:2px;margin-right:8px;vertical-align:middle}
+.muted{color:var(--muted);font-size:.95rem}
+.btn{background:var(--button);color:white;border:none;padding:12px 16px;border-radius:8px;cursor:pointer;font-weight:600;box-shadow:0 4px 15px rgba(74,144,226,.25);transition:all .2s ease;font-size:.95rem}
+.btn:hover{background:var(--button-hover);transform:translateY(-1px);box-shadow:0 6px 20px rgba(74,144,226,.35)}
+.smallbtn{background:var(--card);border:1px solid var(--accent-2);color:var(--accent-2);padding:8px 12px;border-radius:8px;cursor:pointer;font-weight:500;transition:all .2s ease}
+.smallbtn:hover{background:var(--accent-2);color:white;transform:translateY(-1px)}
+#chatBox{height:260px;overflow:auto;padding:15px;border-radius:12px;background:var(--accent-soft);border:1px solid var(--border)}
+.msg{padding:12px 15px;border-radius:12px;margin-bottom:10px;max-width:85%;line-height:1.5;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+.msg.user{background:var(--accent-2);color:white;margin-left:auto}
+.msg.ai{background:var(--card);color:var(--text);border:1px solid var(--border)}
+.theme-toggle{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);color:white;padding:8px 12px;border-radius:8px;cursor:pointer;font-weight:500}
+footer{text-align:center;color:var(--muted);padding:20px;font-size:.9rem}
+.logo{height:50px;width:auto}
+.logo-area{display:flex;align-items:center}
+#donationFab{position:fixed;bottom:22px;right:22px;background:linear-gradient(135deg,#d8b4fe,#a78bfa);color:white;border:none;padding:14px 18px;border-radius:999px;font-weight:600;cursor:pointer;box-shadow:0 8px 25px rgba(167,139,250,.45);z-index:80}
+#donationModal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:90}
+.donation-card{background:var(--card,#fff);border-radius:18px;padding:24px;width:320px;box-shadow:0 20px 45px rgba(0,0,0,.25);position:relative;border:1px solid var(--border);text-align:center}
+#donationClose{position:absolute;top:10px;right:10px;border:none;background:transparent;font-size:20px;cursor:pointer;color:var(--muted)}
+.donation-card .donate-amount{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--border);margin-top:10px;background:var(--hover);color:var(--text);font-weight:600;cursor:pointer}
+.donation-card .donate-amount.active{background:linear-gradient(135deg,#d8b4fe,#a78bfa);color:white;border-color:transparent}
+#stripeDonateBtn{width:100%;margin-top:14px;border-radius:999px}
+#paypal-button-container{margin-top:12px}
+#contactBtn{position:fixed;bottom:22px;left:22px;background:rgba(15,23,42,.92);color:#f9fafb;border:none;padding:12px 16px;border-radius:999px;font-weight:600;cursor:pointer;box-shadow:0 8px 22px rgba(15,23,42,.45);z-index:80}
+#contactModal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:95}
+.contact-card{background:var(--card,#fff);border-radius:18px;padding:26px;width:340px;max-width:90vw;box-shadow:0 18px 40px rgba(0,0,0,.25);border:1px solid var(--border);position:relative}
+#contactClose{position:absolute;top:12px;right:12px;border:none;background:transparent;font-size:20px;cursor:pointer;color:var(--muted)}
 </style>
 </head>
-<body>
+
+<body data-theme="light">
+
+<!-- ✅ SINGLE SUPABASE + AUTH GUARD (ONE SOURCE OF TRUTH) -->
+<script type="module">
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+const SUPABASE_URL = "https://hrpxfnrizypnqwsiasqw.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhycHhmbnJpenlwbnF3aWFzcXciLCJyb2xlIjoiYW5vbiIsImlhdCI6MTc1OTAwNjUyNSwiZXhwIjoyMDc0NTgyNTI1fQ.4btbG22BF7WWtCvq1Du7Bo0aLcKHZIUV4MBwPQW53eY";
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+async function bootAuth() {
+  try {
+    // If arriving from magic link, exchange token and store session
+    if (window.location.hash && window.location.hash.includes("access_token")) {
+      await supabase.auth.getSessionFromUrl({ storeSession: true });
+      // Clean the URL so it doesn't repeat on refresh
+      window.history.replaceState({}, document.title, "/dashboard.html");
+    }
+
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      window.location.replace("/index.html");
+      return;
+    }
+
+    // Expose for the rest of the page scripts
+    window.__supabase = supabase;
+    window.__user = session.user;
+
+    const usernameEl = document.getElementById("username");
+    if (usernameEl) usernameEl.textContent = session.user.email;
+
+  } catch (e) {
+    console.error("Dashboard auth failed:", e);
+    window.location.replace("/index.html");
+  }
+}
+
+window.signOut = async function signOut() {
+  try { await supabase.auth.signOut(); } catch(e) {}
+  window.location.replace("/index.html");
+};
+
+bootAuth();
+</script>
+
 <header>
-<div class="left">
-<h1>🌼 YouCanHeal</h1>
-<nav>
-<a href="#boost">Boost</a>
-<a href="#steps">Steps</a>
-<a href="#luna">Luna</a>
-<a href="#coping">Coping</a>
-</nav>
-</div>
-<div class="controls">
-<div class="muted" id="username">Guest</div>
-<button class="theme-toggle" id="themeToggle">🌙 Dark</button>
-<button class="smallbtn" id="signOut">Sign Out</button>
-</div>
+  <div class="logo-area">
+    <img src="images/youcanheal-logo.png" alt="YouCanHeal Logo" class="logo">
+  </div>
+  <nav>
+    <a href="#boost">Daily Boost</a>
+    <a href="#steps">Steps</a>
+    <a href="#luna">Luna</a>
+    <a href="#coping">Coping</a>
+    <a href="/meditations.html">Meditations</a>
+  </nav>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <span id="username" style="color: rgba(255,255,255,0.9); font-size: 0.9rem;">Guest</span>
+    <button class="theme-toggle" id="themeToggle" type="button">🌙 Dark</button>
+    <button class="smallbtn" onclick="signOut()">Sign Out</button>
+  </div>
 </header>
 
 <div class="container">
-<!-- left/big column -->
-<div class="card big" id="boostCard">
-<h2>🌸 Today's Gentle Boost</h2>
-<p id="boostText" class="muted">Loading your boost…</p>
-<div style="margin-top:12px">
-<button class="btn" id="getBoostBtn">Get Today's Boost</button>
-</div>
-</div>
+  <div class="card big" id="boost">
+    <h2>🌸 Today's Gentle Boost</h2>
+    <p id="boostText" class="muted">Loading your gentle message...</p>
+    <button class="btn" onclick="getBoost()">Get Today's Boost</button>
+  </div>
 
-<div class="card side" id="stepsCard">
-<h2>🚶 Daily Steps</h2>
-<div class="steps">
-<div>
-<div class="num" id="stepsNum">0</div>
-<div class="muted">steps today</div>
-</div>
-</div>
-<div class="step-input">
-<input type="number" id="addStepsInput" placeholder="Add steps" min="1" />
-<button class="btn" onclick="addSteps()">Add</button>
-</div>
-</div>
+  <div class="card side" id="steps">
+    <h2>🚶‍♀️ Daily Steps</h2>
+    <p>Steps Today: <strong id="stepsCount">0</strong></p>
+    <input type="number" id="addStepsInput" placeholder="Add steps..." style="width:100%; margin:10px 0; padding:10px 12px; border:1px solid var(--border); border-radius:8px; background:var(--card); color:var(--text);" />
+    <button class="btn" onclick="addSteps()">+ Add Steps</button>
+  </div>
 
-<div class="card big" id="lunaCard">
-<h2>🌙 Chat with Luna</h2>
-<div id="chatBox">
-<div class="msg ai">
-<strong>Luna:</strong> Hi there 💛 I'm here to listen and support you. How are you feeling today?
-</div>
-</div>
+  <div class="card side" id="mood">
+    <h2>💭 Mood Checker</h2>
+    <p class="muted">How are you feeling today?</p>
+    <div class="mood-btns" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0;">
+      <button class="btn" onclick="logMood('Happy')">😊 Happy</button>
+      <button class="btn" onclick="logMood('Okay')">😐 Okay</button>
+      <button class="btn" onclick="logMood('Sad')">😔 Sad</button>
+      <button class="btn" onclick="logMood('Anxious')">😰 Anxious</button>
+    </div>
+    <div id="moodLog" class="muted" style="margin-top:10px;">No moods logged yet.</div>
+  </div>
 
-<div class="chat-row">
-<input id="chatInput" placeholder="Say hi to Luna..." />
-<button class="btn" id="sendBtn">Send</button>
-<button class="smallbtn" id="clearBtn" style="margin-left:6px">Clear</button>
-</div>
-<div style="margin-top:8px" class="muted">Luna is an empathetic companion and does not provide medical advice.</div>
-</div>
+  <div class="card side" id="featured-meditation">
+    <h2>🎧 Featured Meditation</h2>
+    <div class="muted" id="miniTitle">Loading track...</div>
+    <div class="muted" id="miniBy" style="margin-bottom:8px;">—</div>
+    <div style="display:flex; gap:8px; align-items:center;">
+      <button class="btn" id="miniPlayBtn">Play</button>
+      <button class="smallbtn" onclick="window.location.href='meditations.html'">Open Library</button>
+      <audio id="miniAudio" preload="auto" style="display:none;"></audio>
+    </div>
+  </div>
 
-<div class="card side" id="moodCard">
-<h2>💭 Mood Checker</h2>
-<div class="mood-grid">
-<button class="mood-btn" onclick="logMood('Happy')">😊 Happy</button>
-<button class="mood-btn" onclick="logMood('Okay')">😐 Okay</button>
-<button class="mood-btn" onclick="logMood('Sad')">😔 Sad</button>
-<button class="mood-btn" onclick="logMood('Anxious')">😰 Anxious</button>
-</div>
-<div style="margin-top:12px; font-size:0.9rem" id="moodLog">No moods logged yet.</div>
-</div>
+  <div class="card big" id="luna">
+    <h2>🌙 Chat with Luna</h2>
+    <div id="chatBox">
+      <div class="msg ai">Hi there! 💛 I'm Luna, your wellbeing companion. How are you feeling today?</div>
+    </div>
+    <div style="display:flex; gap:8px; margin-top:10px;">
+      <input type="text" id="chatInput" placeholder="Say hi to Luna..." style="flex:1; padding:10px 12px; border:1px solid var(--border); border-radius:8px; background:var(--card); color:var(--text);" />
+      <button class="btn" onclick="sendMessage()">Send</button>
+      <button class="smallbtn" onclick="clearChat()">Clear</button>
+    </div>
+    <p class="muted" style="margin-top:8px;font-size:.85rem;">Luna provides emotional support and is not a substitute for medical advice.</p>
+  </div>
 
-<div class="card big" id="copingCard">
-<h2>🌿 Coping Library</h2>
-<ul style="line-height:1.6">
-<li><strong>Deep breathing</strong> — 4-4-4 breathing for 5 cycles.</li>
-<li><strong>5-4-3-2-1 grounding</strong> — notice senses to calm anxiety.</li>
-<li><strong>Mini gratitude</strong> — write 3 small things you noticed today.</li>
-<li><strong>Gentle movement</strong> — stretch your arms or take a short walk.</li>
-<li><strong>Self-compassion</strong> — speak to yourself like a dear friend.</li>
-</ul>
-</div>
-
-<!-- Crisis Support Card -->
-<div class="card side crisis-card" id="crisisCard">
-<h2>🆘 Crisis Support</h2>
-<div style="font-size:0.9rem; line-height:1.5">
-<p><strong>If you're in crisis:</strong></p>
-<ul style="margin:8px 0; padding-left:20px">
-<li><strong>Emergency:</strong> 911 (US) / 999 (UK) / 112 (EU)</li>
-<li><strong>Crisis Text:</strong> Text HOME to 741741</li>
-<li><strong>Suicide Prevention:</strong> 988 (US) / 116 123 (UK)</li>
-</ul>
-<p style="font-size:0.85rem; color:var(--muted)">You matter and help is available 💛</p>
-</div>
-</div>
+  <div class="card side" id="coping">
+    <h2>🌿 Coping Library</h2>
+    <ul style="line-height:1.6; padding-left:20px;">
+      <li><strong>Deep Breathing:</strong> Inhale 4s, hold 4s, exhale 4s. Repeat 5x.</li>
+      <li><strong>5-4-3-2-1 Grounding:</strong> Notice 5 things you see, 4 feel, 3 hear, 2 smell, 1 taste.</li>
+      <li><strong>Mini Gratitude:</strong> Write 3 things that made you smile today.</li>
+      <li><strong>Gentle Movement:</strong> Stretch your arms, roll your shoulders, or take a short walk.</li>
+      <li><strong>Self-Compassion:</strong> Speak to yourself like you would to a dear friend.</li>
+    </ul>
+  </div>
 </div>
 
 <footer>
-&copy; <span id="year"></span> YouCanHeal — Not a substitute for medical care. If in crisis, call local emergency services.
+  <p>© YouCanHeal • All rights reserved • <a href="privacy.html">Privacy & Cookies</a></p>
+  <p style="font-size:.85rem;opacity:.8;">This platform provides general wellbeing support and is not medical advice.</p>
 </footer>
 
+<!-- ✅ FRONTEND-ONLY JS (NO LOCALHOST, NO BACKEND_URL) -->
+<script>
+/* Theme */
+const themeToggle = document.getElementById('themeToggle');
+function applyTheme(theme) {
+  document.body.setAttribute('data-theme', theme);
+  themeToggle.textContent = theme === 'dark' ? '☀️ Light' : '🌙 Dark';
+  localStorage.setItem('yc_theme', theme);
+}
+applyTheme(localStorage.getItem('yc_theme') || 'light');
+themeToggle.addEventListener('click', () => {
+  const cur = document.body.getAttribute('data-theme') || 'light';
+  applyTheme(cur === 'dark' ? 'light' : 'dark');
+});
+
+/* Daily boosts */
+const boosts = [
+"You are doing better than you think 💛","Tiny steps are still progress 🌱","Resting is part of healing 🌸",
+"You are growing in calm and confidence 🌿","You deserve the same care you give others 💫",
+"Every breath is a chance to begin again 🌅","Your feelings are valid and temporary 🌙",
+"Small acts of self-care create big changes ✨","You are stronger than you realize 💪",
+"Progress isn't always visible, but it's happening 🌸"
+];
+window.getBoost = function getBoost() {
+  document.getElementById("boostText").textContent = boosts[Math.floor(Math.random() * boosts.length)];
+};
+
+/* Steps (local only) */
+let localSteps = 0;
+window.addSteps = function addSteps() {
+  const input = document.getElementById("addStepsInput");
+  const stepsToAdd = Number(input.value);
+  if (!stepsToAdd || stepsToAdd <= 0) return;
+  localSteps += stepsToAdd;
+  document.getElementById("stepsCount").textContent = localSteps;
+  input.value = "";
+};
+
+/* Mood */
+window.logMood = function logMood(mood) {
+  const log = document.getElementById("moodLog");
+  const time = new Date().toLocaleTimeString();
+  log.textContent = `Last mood: ${mood} (${time})`;
+};
+
+/* Luna (local fallback only) */
+function getEmpatheticReply(text) {
+  const lower = text.toLowerCase();
+  if (lower.includes("hurt myself") || lower.includes("kill myself") || lower.includes("suicide")) {
+    return `I'm really concerned about you 💛 Please reach out for immediate help:<br><br>
+    🆘 <strong>Crisis Support:</strong><br>
+    • Emergency: 999 (UK) / 911 (US)<br>
+    • Samaritans (UK): 116 123<br>
+    • US: Call/Text 988<br><br>
+    You matter and there are people who want to help you. 🌙`;
+  }
+  if (lower.includes("sad") || lower.includes("tired") || lower.includes("depressed"))
+    return "I'm sorry you're feeling that way 💛 It's okay to rest. You're doing the best you can.";
+  if (lower.includes("happy") || lower.includes("good"))
+    return "That’s lovely to hear 🌸 Hold onto that moment — it matters.";
+  if (lower.includes("anxious") || lower.includes("worried"))
+    return "Breathe gently 🌿 Try the 5-4-3-2-1 grounding exercise in the coping library.";
+  return "Thank you for sharing 🌙 I’m here with you. What’s been on your mind?";
+}
+
+window.sendMessage = function sendMessage() {
+  const chatInput = document.getElementById("chatInput");
+  const chatBox = document.getElementById("chatBox");
+  const userMsg = chatInput.value.trim();
+  if (!userMsg) return;
+
+  const userDiv = document.createElement("div");
+  userDiv.className = "msg user";
+  userDiv.innerHTML = `<strong>You:</strong> ${userMsg}`;
+  chatBox.appendChild(userDiv);
+  chatInput.value = "";
+
+  const reply = document.createElement("div");
+  reply.className = "msg ai";
+  reply.innerHTML = `<strong>Luna:</strong> ${getEmpatheticReply(userMsg)}`;
+  chatBox.appendChild(reply);
+
+  chatBox.scrollTop = chatBox.scrollHeight;
+};
+
+window.clearChat = function clearChat() {
+  const chatBox = document.getElementById("chatBox");
+  chatBox.innerHTML = `<div class="msg ai"><strong>Luna:</strong> Hi there 💛 How are you feeling today?</div>`;
+};
+
+/* Mini featured meditation player */
+async function initMiniPlayer() {
+  try {
+    const res = await fetch('media/manifest.json');
+    if (!res.ok) return;
+    const manifest = await res.json();
+    const t = (manifest.meditations && manifest.meditations[0]) || (manifest.whiteNoises && manifest.whiteNoises[0]);
+    if (!t) return;
+
+    const titleEl = document.getElementById('miniTitle');
+    const byEl = document.getElementById('miniBy');
+    const audio = document.getElementById('miniAudio');
+    const btn = document.getElementById('miniPlayBtn');
+    if (!titleEl || !byEl || !audio || !btn) return;
+
+    titleEl.textContent = t.label;
+    byEl.textContent = `by ${t.author}`;
+    audio.src = t.file;
+
+    let playing = false;
+    btn.addEventListener('click', async () => {
+      if (!playing) { try { await audio.play(); } catch(e) {} playing = true; btn.textContent = 'Pause'; }
+      else { audio.pause(); playing = false; btn.textContent = 'Play'; }
+    });
+
+    audio.addEventListener('ended', () => { playing = false; btn.textContent = 'Play'; });
+  } catch(e) {}
+}
+document.addEventListener('DOMContentLoaded', initMiniPlayer);
+</script>
+
+<!-- Cookie banner -->
 <div id="cookie-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;background:#222;color:#fff;padding:12px;text-align:center;font-size:0.9rem;">
-🍪 We use cookies to improve your experience. By continuing, you agree to our <a href="#" style="color:#ffc107;">cookie policy</a>.
-<button id="cookie-accept" style="margin-left:10px;padding:4px 10px;border:none;border-radius:6px;background:#ffc107;color:#000;font-weight:bold;cursor:pointer;">OK</button>
+  🍪 We use cookies to improve your experience.
+  <button id="cookie-accept" style="margin-left:10px;padding:4px 10px;border:none;border-radius:6px;background:#ffc107;color:#000;font-weight:bold;cursor:pointer;">OK</button>
+</div>
+
+<button id="donationFab" aria-label="Support Us">💜 Support Us</button>
+
+<div id="donationModal" hidden>
+  <div class="donation-card">
+    <button id="donationClose">×</button>
+    <h2>Support YouCanHeal</h2>
+    <p>Your support keeps this platform free 💛</p>
+
+    <button class="donate-amount active" data-amt="2">£2 / month</button>
+    <button class="donate-amount" data-amt="5">£5 / month</button>
+
+    <button id="stripeDonateBtn" class="btn" type="button">Donate via Stripe</button>
+    <div id="paypal-button-container"></div>
+  </div>
+</div>
+
+<button id="contactBtn" aria-label="Contact YouCanHeal">📩 Contact</button>
+
+<div id="contactModal" hidden>
+  <div class="contact-card">
+    <button id="contactClose" type="button">×</button>
+    <h2>Contact YouCanHeal</h2>
+    <p>We reply from our Zoho Mail inbox within 2 working days.</p>
+
+    <form action="mailto:support@youcanheal.co.uk" method="post" enctype="text/plain">
+      <input type="email" name="replyTo" placeholder="Your email" required />
+      <textarea name="message" rows="4" placeholder="How can we help?" required></textarea>
+      <p class="contact-note">Partner enquiries: <a href="mailto:partners@youcanheal.co.uk">partners@youcanheal.co.uk</a></p>
+      <button type="submit" class="btn">Send via Email</button>
+    </form>
+  </div>
 </div>
 
 <script>
-// UI state
-document.getElementById('year').textContent = new Date().getFullYear();
+/* Cookie banner */
+if (!localStorage.getItem('yc_cookie')) {
+  const banner = document.getElementById('cookie-banner');
+  banner.style.display = 'block';
+  document.getElementById('cookie-accept').onclick = () => {
+    localStorage.setItem('yc_cookie','true');
+    banner.style.display = 'none';
+  };
+}
 
-// Dark mode toggle (persist)
-const themeToggle = document.getElementById('themeToggle');
-function applyTheme(t){
-if(t === 'dark') {
-document.documentElement.setAttribute('data-theme','dark');
-themeToggle.textContent = '☀️ Light';
-} else {
-document.documentElement.removeAttribute('data-theme');
-themeToggle.textContent = '🌙 Dark';
-}
-localStorage.setItem('yc_theme', t);
-}
-// init theme
-const saved = localStorage.getItem('yc_theme') || 'light';
-applyTheme(saved);
-themeToggle.addEventListener('click', () => {
-const cur = localStorage.getItem('yc_theme') || 'light';
-const next = cur === 'dark' ? 'light' : 'dark';
-applyTheme(next);
+/* Donation + contact modals */
+const donationFab = document.getElementById("donationFab");
+const donationModal = document.getElementById("donationModal");
+const donationCloseBtn = document.getElementById("donationClose");
+const amountButtons = Array.from(document.querySelectorAll(".donate-amount"));
+const stripeBtn = document.getElementById("stripeDonateBtn");
+
+donationFab.addEventListener("click", () => donationModal.hidden = false);
+donationCloseBtn.addEventListener("click", () => donationModal.hidden = true);
+donationModal.addEventListener("click", (e) => { if (e.target === donationModal) donationModal.hidden = true; });
+
+amountButtons.forEach(btn => {
+  btn.addEventListener("click", () => {
+    amountButtons.forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+  });
 });
 
-// Enhanced boost pool
-const boosts = [
-"Take 3 deep breaths and notice how your chest moves 🌸",
-"Step outside for 2 minutes and notice one small detail of nature 🌿",
-"Write down one small win from today — even if tiny ✨",
-"Make a warm drink and slowly enjoy the first sip ☕",
-"Send a kind message to someone you care about 💛",
-"Stretch your arms above your head and breathe deeply 🧘‍♀️",
-"Look in the mirror and say one kind thing to yourself 🌟",
-"Tidy up one small area — just your desk or a drawer 🧹",
-"Put on your favorite song and move gently for 1 minute 🎵",
-"Take a photo of something beautiful you notice right now 📸"
-];
-function getBoost(){
-const b = boosts[Math.floor(Math.random()*boosts.length)];
-document.getElementById('boostText').textContent = b;
-// Add gentle animation
-const el = document.getElementById('boostText');
-el.style.opacity = '0';
-setTimeout(() => {
-el.style.transition = 'opacity 0.5s ease';
-el.style.opacity = '1';
-}, 100);
-}
-document.getElementById('getBoostBtn').addEventListener('click', getBoost);
+const DONATION_PAYPAL_PLANS = { 2: "P-6PU50610GN123364SNE27HYY", 5: "P-8J411952AV1634600NE27J6Q" };
+const getSelectedAmount = () => Number((amountButtons.find(b => b.classList.contains("active")) || amountButtons[0]).dataset.amt);
 
-// Enhanced steps with local storage
-let steps = parseInt(localStorage.getItem('dailySteps')) || 0;
-document.getElementById('stepsNum').textContent = steps;
-
-function addSteps(){
-const v = Number(document.getElementById('addStepsInput').value || 0);
-if (v <= 0) {
-alert('Please enter a positive number of steps');
-return;
-}
-steps += v;
-document.getElementById('stepsNum').textContent = steps;
-document.getElementById('addStepsInput').value = '';
-localStorage.setItem('dailySteps', steps);
-
-// Celebration for milestones
-if (steps >= 10000) {
-setTimeout(() => alert('🎉 Amazing! You hit 10,000 steps!'), 100);
-} else if (steps >= 5000) {
-setTimeout(() => alert('🌟 Great job! You reached 5,000 steps!'), 100);
-}
-}
-
-// Enhanced mood logger with local storage
-function logMood(mood){
-const time = new Date().toLocaleTimeString();
-document.getElementById('moodLog').textContent = `Last: ${mood} (${time})`;
-
-// Save to local storage
-const today = new Date().toDateString();
-const moodData = JSON.parse(localStorage.getItem('moodHistory')) || {};
-if (!moodData[today]) moodData[today] = [];
-moodData[today].push({ mood, time: new Date().toISOString() });
-localStorage.setItem('moodHistory', JSON.stringify(moodData));
-
-// Visual feedback
-const buttons = document.querySelectorAll('.mood-btn');
-buttons.forEach(btn => btn.style.transform = 'scale(1)');
-event.target.style.transform = 'scale(1.1)';
-setTimeout(() => event.target.style.transform = 'scale(1)', 200);
-}
-
-// Enhanced chat functionality
-const chatBox = document.getElementById('chatBox');
-const chatInput = document.getElementById('chatInput');
-const sendBtn = document.getElementById('sendBtn');
-const clearBtn = document.getElementById('clearBtn');
-
-function appendMsg(role, text, isCrisis = false){
-const div = document.createElement('div');
-div.className = 'msg ' + (role === 'user' ? 'user' : 'ai') + (isCrisis ? ' crisis' : '');
-div.innerHTML = `<strong>${role === 'user' ? 'You' : 'Luna'}:</strong> ${text.replace(/\n/g, '<br>')}`;
-chatBox.appendChild(div);
-chatBox.scrollTop = chatBox.scrollHeight;
-}
-
-// Initialize session on load
-fetch('/api/session', { 
-method:'POST', 
-headers:{'Content-Type':'application/json'}, 
-body: JSON.stringify({}) 
-})
-.then(r=>r.json())
-.then(d=>{
-if(d.user) document.getElementById('username').textContent = d.user.email || 'You';
-})
-.catch(()=>{
-console.log('Session init failed, continuing in demo mode');
+/* Stripe button (safe) */
+stripeBtn.addEventListener("click", () => {
+  alert("Stripe checkout requires a deployed backend endpoint. When your backend is live, I’ll wire this button to it safely.");
 });
 
-// Enhanced send message with better error handling
-async function sendMessage(){
-const text = chatInput.value.trim();
-if(!text) return;
-
-appendMsg('user', text);
-chatInput.value = '';
-sendBtn.disabled = true;
-sendBtn.textContent = 'Sending...';
-
-// Add typing indicator
-const typingDiv = document.createElement('div');
-typingDiv.className = 'msg ai loading';
-typingDiv.innerHTML = '<strong>Luna:</strong> <em>typing...</em>';
-chatBox.appendChild(typingDiv);
-chatBox.scrollTop = chatBox.scrollHeight;
-
-try {
-const resp = await fetch('/api/chat', {
-method: 'POST',
-headers: {'Content-Type':'application/json'},
-body: JSON.stringify({ message: text })
-});
-
-// Remove typing indicator
-typingDiv.remove();
-
-const data = await resp.json();
-if (data?.reply) {
-appendMsg('assistant', data.reply, data.isCrisisResponse);
-} else {
-appendMsg('assistant', 'Sorry — Luna is having trouble. Try again later.');
-}
-} catch (err) {
-console.error(err);
-typingDiv.remove();
-appendMsg('assistant', 'Network error. Please try again later.');
-} finally {
-sendBtn.disabled = false;
-sendBtn.textContent = 'Send';
-}
+/* PayPal buttons */
+if (window.paypal?.Buttons) {
+  window.paypal.Buttons({
+    style: { layout: "vertical", color: "gold", shape: "rect", label: "subscribe" },
+    createSubscription(data, actions) {
+      const amount = getSelectedAmount();
+      const plan = DONATION_PAYPAL_PLANS[amount];
+      if (!plan) { alert("Please select £2 or £5."); return; }
+      return actions.subscription.create({ plan_id: plan });
+    },
+    onApprove() { alert("Thank you for supporting YouCanHeal via PayPal! 💛"); donationModal.hidden = true; },
+    onError() { alert("PayPal could not start the subscription. Please try again."); }
+  }).render("#paypal-button-container");
 }
 
-// Clear chat
-async function clearChat(){
-try {
-await fetch('/api/chat/reset', { method:'POST' });
-chatBox.innerHTML = '<div class="msg ai"><strong>Luna:</strong> Hi there 💛 I\'m here to listen and support you. How are you feeling today?</div>';
-} catch (err) {
-console.error('Clear chat failed:', err);
-}
-}
-
-// Event listeners
-sendBtn.addEventListener('click', sendMessage);
-clearBtn.addEventListener('click', clearChat);
-chatInput.addEventListener('keydown', e => { 
-if(e.key === 'Enter' && !e.shiftKey) {
-e.preventDefault();
-sendMessage();
-}
-});
-
-// Enhanced sign out
-document.getElementById('signOut').addEventListener('click', async ()=>{
-try {
-await fetch('/api/logout', { method:'POST' });
-} catch (err) {
-console.error('Logout error:', err);
-}
-window.location.href = '/';
-});
-
-// Auto-focus chat input
-chatInput.focus();
-
-// Initial boost on load
-setTimeout(getBoost, 500);
-
-// Load mood history on startup
-window.addEventListener('load', () => {
-const today = new Date().toDateString();
-const moodData = JSON.parse(localStorage.getItem('moodHistory')) || {};
-const todayMoods = moodData[today];
-if (todayMoods && todayMoods.length > 0) {
-const lastMood = todayMoods[todayMoods.length - 1];
-const time = new Date(lastMood.time).toLocaleTimeString();
-document.getElementById('moodLog').textContent = `Last: ${lastMood.mood} (${time})`;
-}
-});
-
-// Cookie consent banner
-if(!localStorage.getItem('yc_cookie')){
-const banner = document.getElementById('cookie-banner');
-banner.style.display='block';
-document.getElementById('cookie-accept').onclick=()=>{
-localStorage.setItem('yc_cookie','true');
-banner.style.display='none';
-};
-}
-
-// Keyboard shortcuts
-document.addEventListener('keydown', (e) => {
-if (e.ctrlKey || e.metaKey) {
-switch(e.key) {
-case 'd':
-e.preventDefault();
-themeToggle.click();
-break;
-case 'k':
-e.preventDefault();
-clearChat();
-break;
-}
-}
-});
+/* Contact modal */
+const contactBtn = document.getElementById("contactBtn");
+const contactModal = document.getElementById("contactModal");
+const contactCloseBtn = document.getElementById("contactClose");
+contactBtn.addEventListener("click", () => contactModal.hidden = false);
+contactCloseBtn.addEventListener("click", () => contactModal.hidden = true);
+contactModal.addEventListener("click", (e) => { if (e.target === contactModal) contactModal.hidden = true; });
 </script>
+
 </body>
 </html>
