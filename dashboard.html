@@ -1,19 +1,74 @@
-import { supabase } from "./supabaseHelper.js";
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>YouCanHeal Dashboard</title>
 
-async function protect() {
-  const { data } = await supabase.auth.getSession();
-  if (!data.session) {
-    window.location.replace("/index.html");
-    return;
-  }
+  <link rel="icon" href="images/youcanheal-logo.png" />
 
-  const user = data.session.user;
-  document.getElementById("username").textContent = user.email;
-}
+  <style>
+    body{
+      margin:0;
+      font-family: Inter, system-ui, sans-serif;
+      background: linear-gradient(135deg,#f8fafc,#eef2ff);
+      min-height:100vh;
+    }
+    header{
+      padding:16px 20px;
+      background:#4f46e5;
+      color:white;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+    }
+    main{
+      max-width:900px;
+      margin:30px auto;
+      padding:20px;
+    }
+    .card{
+      background:white;
+      border-radius:16px;
+      padding:20px;
+      box-shadow:0 12px 30px rgba(0,0,0,.1);
+    }
+    button{
+      padding:10px 14px;
+      border:none;
+      border-radius:8px;
+      background:#ef4444;
+      color:white;
+      font-weight:700;
+      cursor:pointer;
+    }
+  </style>
 
-protect();
+  <!-- Supabase config -->
+  <script>
+    window.SUPABASE_URL = "https://hrpxfnrizypnqwsiasqw.supabase.co";
+    window.SUPABASE_ANON_KEY = "PASTE_YOUR_ANON_KEY_HERE";
+  </script>
+</head>
 
-document.getElementById("signOut")?.addEventListener("click", async () => {
-  await supabase.auth.signOut();
-  window.location.replace("/index.html");
-});
+<body>
+  <header>
+    <strong>YouCanHeal</strong>
+    <div>
+      <span id="username">Loading…</span>
+      <button id="signOut">Sign out</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="card">
+      <h2>Welcome 🌷</h2>
+      <p>You are successfully logged in.</p>
+    </div>
+  </main>
+
+  <!-- JS -->
+  <script type="module" src="supabaseHelper.js"></script>
+  <script type="module" src="dashboard.js"></script>
+</body>
+</html>
