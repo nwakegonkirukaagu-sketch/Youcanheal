@@ -1,74 +1,240 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>YouCanHeal Dashboard</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>YouCanHeal Dashboard</title>
 
-  <link rel="icon" href="images/youcanheal-logo.png" />
+<link rel="icon" type="image/png" href="images/youcanheal-logo.png" />
 
-  <style>
-    body{
-      margin:0;
-      font-family: Inter, system-ui, sans-serif;
-      background: linear-gradient(135deg,#f8fafc,#eef2ff);
-      min-height:100vh;
-    }
-    header{
-      padding:16px 20px;
-      background:#4f46e5;
-      color:white;
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-    }
-    main{
-      max-width:900px;
-      margin:30px auto;
-      padding:20px;
-    }
-    .card{
-      background:white;
-      border-radius:16px;
-      padding:20px;
-      box-shadow:0 12px 30px rgba(0,0,0,.1);
-    }
-    button{
-      padding:10px 14px;
-      border:none;
-      border-radius:8px;
-      background:#ef4444;
-      color:white;
-      font-weight:700;
-      cursor:pointer;
-    }
-  </style>
+<!-- PayPal SDK -->
+<script src="https://www.paypal.com/sdk/js?client-id=AeAkNJQMO6eiYY-v0IsWHNm64M3nHUnFaqKZ0iICehGrAVufHv1c3DGLNPXRkbKjjTJ_0cjN0Slc5tZz&vault=true&intent=subscription"></script>
 
-  <!-- Supabase config -->
-  <script>
-    window.SUPABASE_URL = "https://hrpxfnrizypnqwsiasqw.supabase.co";
-    window.SUPABASE_ANON_KEY = "PASTE_YOUR_ANON_KEY_HERE";
-  </script>
+<style>
+:root{
+  --bg:#f8fafc; --card:#ffffff; --accent:#10b981; --accent-2:#3b82f6;
+  --accent-soft:#d1fae5; --text:#1f2937; --muted:#6b7280; --border:#e5e7eb;
+  --hover:#f3f4f6; --button:var(--accent); --button-hover:#059669;
+}
+[data-theme="dark"]{
+  --bg:#121212; --card:#1E1E1E; --accent:#A3D3B8; --accent-2:#4A90E2;
+  --accent-soft:#1a2a25; --text:#E0E0E0; --muted:#B0B0B0; --border:#2A2A2A;
+  --hover:#1A1A1A; --button:#4A90E2; --button-hover:#6AA6EA;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0; font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;
+  background:linear-gradient(135deg,var(--bg) 0%, var(--hover) 100%);
+  color:var(--text); min-height:100vh;
+}
+header{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:16px 24px;
+  background:linear-gradient(135deg,var(--accent) 0%, var(--accent-2) 100%);
+  color:#fff; position:sticky; top:0; z-index:100;
+}
+header h1{margin:0;font-size:1.2rem;}
+header nav a{color:#fff;text-decoration:none;margin-left:14px;font-weight:600;}
+.container{
+  max-width:1100px; margin:30px auto; padding:0 18px;
+  display:grid; grid-template-columns:repeat(12,1fr); gap:20px;
+}
+.card{
+  background:var(--card); border-radius:16px; padding:24px;
+  border:1px solid var(--border); box-shadow:0 4px 20px rgba(0,0,0,.08);
+}
+.big{grid-column:span 8;} .side{grid-column:span 4;}
+@media(max-width:900px){ .big,.side{grid-column:span 12;} }
+h2{margin:0 0 12px 0;font-size:1.25rem;}
+.muted{color:var(--muted);}
+.btn{
+  background:var(--button); color:#fff; border:none; padding:12px 16px;
+  border-radius:8px; cursor:pointer; font-weight:700;
+}
+.btn:hover{background:var(--button-hover);}
+.smallbtn{
+  background:var(--card); border:1px solid var(--accent-2); color:var(--accent-2);
+  padding:8px 12px; border-radius:8px; cursor:pointer; font-weight:600;
+}
+.smallbtn:hover{background:var(--accent-2); color:#fff;}
+#chatBox{
+  height:260px; overflow:auto; padding:15px; border-radius:12px;
+  background:var(--accent-soft); border:1px solid var(--border);
+}
+.msg{padding:12px 15px;border-radius:12px;margin-bottom:10px;max-width:85%;}
+.msg.user{background:var(--accent-2);color:#fff;margin-left:auto;}
+.msg.ai{background:var(--card);border:1px solid var(--border);}
+.theme-toggle{
+  background:rgba(255,255,255,.2); border:1px solid rgba(255,255,255,.3);
+  color:#fff; padding:8px 12px; border-radius:8px; cursor:pointer; font-weight:700;
+}
+footer{text-align:center;color:var(--muted);padding:20px;font-size:.9rem;}
+
+#donationFab{
+  position:fixed; bottom:22px; right:22px;
+  background:linear-gradient(135deg,#d8b4fe,#a78bfa);
+  color:white;border:none;padding:14px 18px;border-radius:999px;
+  font-weight:800; cursor:pointer; box-shadow:0 8px 25px rgba(167,139,250,.45);
+  z-index:80;
+}
+#donationModal{
+  position:fixed; inset:0; background:rgba(0,0,0,.45);
+  display:flex; align-items:center; justify-content:center; z-index:90;
+}
+.donation-card{
+  background:var(--card); border-radius:18px; padding:24px; width:320px;
+  border:1px solid var(--border); text-align:center;
+}
+#donationClose{position:absolute; margin-left:280px; margin-top:-10px; background:transparent; border:none; font-size:20px; cursor:pointer;}
+.donate-amount{
+  width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--border);
+  margin-top:10px; background:var(--hover); color:var(--text); font-weight:800; cursor:pointer;
+}
+.donate-amount.active{background:linear-gradient(135deg,#d8b4fe,#a78bfa); color:white; border-color:transparent;}
+#contactBtn{
+  position:fixed; bottom:22px; left:22px;
+  background:rgba(15,23,42,.92); color:#f9fafb;border:none;padding:12px 16px;border-radius:999px;
+  font-weight:800; cursor:pointer; box-shadow:0 8px 22px rgba(15,23,42,.45); z-index:80;
+}
+#contactModal{
+  position:fixed; inset:0; background:rgba(0,0,0,.5);
+  display:flex; align-items:center; justify-content:center; z-index:95;
+}
+.contact-card{
+  background:var(--card); border-radius:18px; padding:26px; width:340px; max-width:90vw;
+  border:1px solid var(--border); position:relative;
+}
+#contactClose{position:absolute;top:12px;right:12px;border:none;background:transparent;font-size:20px;cursor:pointer;color:var(--muted);}
+.toast-banner{
+  position:fixed; bottom:24px; right:24px; padding:12px 16px; border-radius:12px;
+  background:rgba(15,23,42,.92); color:#f8fafc; font-weight:800; opacity:0;
+  transform:translateY(10px); transition:opacity .3s, transform .3s; z-index:130; pointer-events:none;
+}
+.toast-banner.visible{opacity:1; transform:translateY(0);}
+.toast-banner.success{background:linear-gradient(135deg,#22c55e,#16a34a);}
+.toast-banner.error{background:linear-gradient(135deg,#f87171,#dc2626);}
+
+#cookie-banner{
+  display:none;
+  position:fixed; bottom:0; left:0; right:0;
+  background:#222; color:#fff; padding:12px; text-align:center; font-size:.9rem;
+}
+#cookie-accept{
+  margin-left:10px; padding:4px 10px; border:none; border-radius:6px;
+  background:#ffc107; color:#000; font-weight:900; cursor:pointer;
+}
+</style>
 </head>
 
-<body>
-  <header>
-    <strong>YouCanHeal</strong>
-    <div>
-      <span id="username">Loading…</span>
-      <button id="signOut">Sign out</button>
-    </div>
-  </header>
+<body data-theme="light">
+<header>
+  <h1>YouCanHeal</h1>
+  <nav>
+    <a href="#boost">Daily Boost</a>
+    <a href="#steps">Steps</a>
+    <a href="#luna">Luna</a>
+    <a href="#coping">Coping</a>
+    <a href="/meditations.html">Meditations</a>
+  </nav>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <span id="username">Loading...</span>
+    <button class="theme-toggle" id="themeToggle">🌙 Dark</button>
+    <button class="smallbtn" id="signOut">Sign Out</button>
+  </div>
+</header>
 
-  <main>
-    <div class="card">
-      <h2>Welcome 🌷</h2>
-      <p>You are successfully logged in.</p>
-    </div>
-  </main>
+<div class="container">
+  <div class="card big" id="boost">
+    <h2>🌸 Today's Gentle Boost</h2>
+    <p id="boostText" class="muted">Loading your gentle message...</p>
+    <button class="btn" onclick="getBoost()">Get Today's Boost</button>
+  </div>
 
-  <!-- JS -->
-  <script type="module" src="supabaseHelper.js"></script>
-  <script type="module" src="dashboard.js"></script>
+  <div class="card side" id="steps">
+    <h2>🚶‍♀️ Daily Steps</h2>
+    <p>Steps Today: <strong id="stepsCount">0</strong></p>
+    <input type="number" id="addStepsInput" placeholder="Add steps..." style="width:100%;margin:10px 0;padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:var(--card);color:var(--text);" />
+    <button class="btn" onclick="addSteps()">+ Add Steps</button>
+  </div>
+
+  <div class="card side" id="mood">
+    <h2>💭 Mood Checker</h2>
+    <p class="muted">How are you feeling today?</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0;">
+      <button class="btn" onclick="logMood('Happy')">😊 Happy</button>
+      <button class="btn" onclick="logMood('Okay')">😐 Okay</button>
+      <button class="btn" onclick="logMood('Sad')">😔 Sad</button>
+      <button class="btn" onclick="logMood('Anxious')">😰 Anxious</button>
+    </div>
+    <div id="moodLog" class="muted">No moods logged yet.</div>
+  </div>
+
+  <div class="card big" id="luna">
+    <h2>🌙 Chat with Luna</h2>
+    <div id="chatBox">
+      <div class="msg ai">Hi there! 💛 I'm Luna, your wellbeing companion. How are you feeling today?</div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:10px;">
+      <input type="text" id="chatInput" placeholder="Say hi to Luna..." style="flex:1;padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:var(--card);color:var(--text);" />
+      <button class="btn" id="sendBtn">Send</button>
+      <button class="smallbtn" onclick="clearChat()">Clear</button>
+    </div>
+    <p class="muted" style="margin-top:8px;font-size:.85rem;">Luna provides emotional support and is not a substitute for medical advice.</p>
+  </div>
+
+  <div class="card side" id="coping">
+    <h2>🌿 Coping Library</h2>
+    <ul style="line-height:1.7;padding-left:20px;">
+      <li><strong>Deep Breathing:</strong> Inhale 4s, hold 4s, exhale 4s. Repeat 5x.</li>
+      <li><strong>5-4-3-2-1 Grounding:</strong> Notice 5 things you see, 4 feel, 3 hear, 2 smell, 1 taste.</li>
+      <li><strong>Mini Gratitude:</strong> Write 3 things that made you smile today.</li>
+      <li><strong>Gentle Movement:</strong> Stretch your arms, roll your shoulders, or take a short walk.</li>
+      <li><strong>Self-Compassion:</strong> Speak to yourself like you would to a dear friend.</li>
+    </ul>
+  </div>
+</div>
+
+<footer>
+  <p>© YouCanHeal • All rights reserved • <a href="privacy.html">Privacy & Cookies</a></p>
+  <p style="font-size:.85rem;opacity:.8;">This platform provides general wellbeing support and is not medical advice.</p>
+</footer>
+
+<!-- Cookie banner (single) -->
+<div id="cookie-banner">
+  🍪 We use cookies to improve your experience.
+  <button id="cookie-accept">OK</button>
+</div>
+
+<!-- Donation -->
+<button id="donationFab" aria-label="Support Us">💜 Support Us</button>
+<div id="donationModal" hidden>
+  <div class="donation-card" style="position:relative;">
+    <button id="donationClose">×</button>
+    <h2>Support YouCanHeal</h2>
+    <p class="muted">Your support keeps this platform free 💛</p>
+    <button class="donate-amount" data-amt="2">£2 / month</button>
+    <button class="donate-amount" data-amt="5">£5 / month</button>
+    <div id="paypal-button-container"></div>
+  </div>
+</div>
+
+<!-- Contact -->
+<button id="contactBtn" aria-label="Contact YouCanHeal">📩 Contact</button>
+<div id="contactModal" hidden>
+  <div class="contact-card">
+    <button id="contactClose" type="button">×</button>
+    <h2>Contact YouCanHeal</h2>
+    <p class="muted">We reply within 2 working days.</p>
+    <p style="margin-top:12px;">
+      Email: <a href="mailto:youcanheal@youcanheal.co.uk">youcanheal@youcanheal.co.uk</a>
+    </p>
+  </div>
+</div>
+
+<div id="dashboardToast" class="toast-banner" role="status" aria-live="polite"></div>
+
+<!-- Scripts -->
+<script type="module" src="./supabaseHelper.js"></script>
+<script type="module" src="./dashboard.js"></script>
 </body>
 </html>
