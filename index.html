@@ -2,54 +2,296 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>YouCanHeal — Welcome</title>
 
-  <!-- CSP (GitHub Pages safe) -->
-  <meta http-equiv="Content-Security-Policy"
-    content="
-      default-src 'self';
-      script-src 'self' https://cdn.jsdelivr.net https://www.paypal.com;
-      style-src 'self' 'unsafe-inline';
-      img-src 'self' data:;
-      connect-src 'self' https://*.supabase.co https://www.paypal.com;
-      frame-src https://www.paypal.com;
-    ">
+  <link rel="icon" type="image/png" href="images/youcanheal-logo.png">
 
-  <link rel="icon" href="images/youcanheal-logo.png" />
-  <link rel="stylesheet" href="style.css" />
+  <!-- PayPal SDK -->
+  <script src="https://www.paypal.com/sdk/js?client-id=AeAkNJQMO6eiYY-v0IsWHNm64M3nHUnFaqKZ0iICehGrAVufHv1c3DGLNPXRkbKjjTJ_0cjN0Slc5tZz&vault=true&intent=subscription"></script>
 
-  <!-- Supabase -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root{
+      --text:#1f2937; --muted:#6b7280; --border:#e5e7eb;
+      --button:#3b82f6; --button-hover:#2563eb;
+    }
+    [data-theme="dark"]{
+      --text:#e5e7eb; --muted:#cbd5e1; --border:#334155;
+      --button:#4A90E2; --button-hover:#6AA6EA;
+    }
+
+    body{
+      margin:0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      min-height:100vh;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      padding:16px;
+      color:var(--text);
+
+      /* IMPORTANT: this path must exist */
+      background-image: url("images/youcanheal-bg.png");
+      background-size:cover;
+      background-position:center;
+      background-repeat:no-repeat;
+    }
+
+    [data-theme="dark"] body{
+      background-image:
+        linear-gradient(135deg, rgba(0,0,0,.45), rgba(0,0,0,.65)),
+        url("images/youcanheal-bg.png");
+    }
+
+    .login-box{
+      width:100%;
+      max-width:520px;
+      background: rgba(255,255,255,0.90);
+      border-radius:22px;
+      padding:34px 34px 26px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+      backdrop-filter: blur(12px);
+      border:1px solid rgba(255,255,255,0.35);
+      position:relative;
+    }
+    [data-theme="dark"] .login-box{
+      background: rgba(15,23,42,0.86);
+      border:1px solid rgba(148,163,184,0.25);
+    }
+
+    h1{ margin:4px 0 6px; color:#8fbfa8; font-size:2rem; text-align:center; }
+    .subtitle{ margin:0 0 18px; text-align:center; color:var(--muted); font-size:1.05rem; }
+
+    label{ display:block; font-weight:700; color:var(--text); margin:14px 0 6px; }
+    input[type="email"]{
+      width:100%;
+      padding:14px 14px;
+      border-radius:12px;
+      border:2px solid var(--border);
+      font-size:1rem;
+      background:#fff;
+      box-sizing:border-box;
+    }
+    [data-theme="dark"] input[type="email"]{ background: rgba(2,6,23,0.35); color:var(--text); }
+
+    .consent-row{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      margin:12px 0 14px;
+      color:var(--muted);
+      font-size:0.95rem;
+      line-height:1.25;
+    }
+    .consent-row input{ width:18px; height:18px; flex:0 0 auto; }
+
+    button.primary{
+      width:100%;
+      padding:14px 14px;
+      border-radius:12px;
+      border:none;
+      background:var(--button);
+      color:white;
+      font-size:1.05rem;
+      font-weight:800;
+      cursor:pointer;
+    }
+    button.primary:hover{ background:var(--button-hover); }
+
+    .help-text{
+      margin-top:14px;
+      color:var(--muted);
+      font-size:0.95rem;
+      line-height:1.45;
+      text-align:center;
+    }
+    .help-text a{ color:#8b5cf6; }
+
+    .disclaimer{
+      margin-top:18px;
+      padding-top:14px;
+      border-top:1px solid rgba(107,114,128,0.25);
+      color:var(--muted);
+      font-size:0.85rem;
+      line-height:1.45;
+    }
+
+    .theme-toggle{
+      position:absolute;
+      top:14px;
+      right:14px;
+      background: rgba(255,255,255,0.25);
+      border: 1px solid rgba(255,255,255,0.35);
+      color: var(--text);
+      padding:8px 10px;
+      border-radius:10px;
+      cursor:pointer;
+      font-weight:700;
+    }
+    [data-theme="dark"] .theme-toggle{ background: rgba(2,6,23,0.35); color:#e5e7eb; }
+
+    /* Floating buttons */
+    .floating-btn{
+      position:fixed; z-index:60;
+      border-radius:999px; border:none;
+      cursor:pointer; padding:10px 16px;
+      font-weight:800; box-shadow:0 12px 34px rgba(0,0,0,0.25);
+      display:inline-flex; align-items:center; gap:8px;
+    }
+    #supportBtn{ top:18px; right:18px; background: linear-gradient(135deg,#f9f5ff,#c4b5fd,#a855f7); color:#111827; }
+    #contactBtn{ bottom:18px; right:18px; background: rgba(15,23,42,0.92); color:#f8fafc; }
+
+    /* Modals */
+    .backdrop{
+      position:fixed; inset:0;
+      background: rgba(0,0,0,0.55);
+      display:none; align-items:center; justify-content:center;
+      z-index:70;
+      padding:16px;
+    }
+    .backdrop.open{ display:flex; }
+    .modal{
+      width:100%; max-width:420px;
+      background: var(--text);
+      color:white;
+      border-radius:18px;
+      padding:20px 18px 16px;
+      position:relative;
+      box-shadow:0 25px 70px rgba(0,0,0,0.45);
+    }
+    .modal h2{ margin:4px 0 8px; font-size:1.35rem; }
+    .modal p{ margin:0 0 12px; opacity:0.9; }
+    .close{
+      position:absolute; top:10px; right:10px;
+      background:transparent; border:none; color:white;
+      font-size:22px; cursor:pointer;
+    }
+    .pill-row{ display:flex; gap:8px; margin:12px 0; }
+    .pill{
+      flex:1; padding:10px 12px; border-radius:999px;
+      border:1px solid rgba(255,255,255,0.35);
+      background:transparent; color:white; cursor:pointer; font-weight:800;
+    }
+    .pill.active{ background: linear-gradient(135deg,#a855f7,#6366f1); border-color:transparent; }
+
+    #paypal-button-container{ margin-top:10px; }
+
+    /* Cookie banner */
+    #cookie-banner{
+      position:fixed; left:0; right:0; bottom:0;
+      background: rgba(30,41,59,0.95);
+      color:white;
+      padding:12px 14px;
+      text-align:center;
+      font-size:0.9rem;
+      z-index:80;
+      display:none;
+    }
+    #cookie-accept{
+      margin-left:10px; padding:5px 12px;
+      border:none; border-radius:8px;
+      background:#facc15; color:#111827;
+      font-weight:900; cursor:pointer;
+    }
+
+    /* status message */
+    #formMessage{
+      margin-top:12px;
+      padding:10px 12px;
+      border-radius:12px;
+      font-weight:700;
+      display:none;
+    }
+    #formMessage.success{ background: rgba(34,197,94,0.15); border:1px solid rgba(34,197,94,0.35); color:#166534; }
+    #formMessage.error{ background: rgba(239,68,68,0.12); border:1px solid rgba(239,68,68,0.35); color:#b91c1c; }
+
+    /* Mobile: keep consent text next to checkbox */
+    @media (max-width: 520px){
+      .login-box{ padding:28px 18px 22px; }
+      h1{ font-size:1.8rem; }
+      .consent-row{ font-size:0.95rem; }
+    }
+  </style>
+
+  <!-- Supabase config (keep here) -->
+  <script>
+    window.SUPABASE_URL = "https://hrpxfnrizypnqwsiasqw.supabase.co";
+    window.SUPABASE_ANON_KEY = "PASTE_YOUR_ANON_KEY_HERE";
+  </script>
 </head>
 
-<body class="login-page">
+<body data-theme="light">
+
+  <button id="supportBtn" class="floating-btn" type="button">❤️ Support Us</button>
+  <button id="contactBtn" class="floating-btn" type="button">✉ Contact</button>
 
   <div class="login-box">
+    <button id="themeToggle" class="theme-toggle" type="button">🌙 Dark</button>
+
     <h1>Welcome to YouCanHeal</h1>
     <p class="subtitle">Your gentle wellbeing companion 🌷</p>
 
-    <form id="magicForm">
-      <label>Email address</label>
-      <input id="email" type="email" required placeholder="Enter your email" />
+    <form id="magicForm" autocomplete="on">
+      <label for="email">Email Address</label>
+      <input id="email" type="email" placeholder="Enter your email" required />
 
-      <label class="consent-label">
+      <div class="consent-row">
         <input type="checkbox" id="consent" />
-        I consent to store non-sensitive data for sign-in
-      </label>
+        <span>I consent to store non-sensitive data for sign-in</span>
+      </div>
 
-      <button type="submit">Send Magic Link</button>
-      <div id="formMessage" class="form-message" hidden></div>
+      <button class="primary" type="submit">Send Magic Link</button>
+      <div id="formMessage" role="status" aria-live="polite"></div>
     </form>
 
-    <p class="help-text">
-      📧 Check spam if you don’t see the email.<br>
-      Contact:
-      <a href="mailto:youcanheal@youcanheal.co.uk">youcanheal@youcanheal.co.uk</a>
-    </p>
+    <div class="help-text">
+      📨 Check your spam folder if you don’t see the email within a few minutes.<br>
+      Contact: <a href="mailto:youcanheal@youcanheal.co.uk">youcanheal@youcanheal.co.uk</a>
+    </div>
+
+    <div class="disclaimer">
+      <p><strong>Privacy:</strong> We respect your data and use minimal cookies for functionality.</p>
+      <p><strong>Disclaimer:</strong> YouCanHeal offers wellbeing support and is not a substitute for medical advice.</p>
+    </div>
   </div>
 
+  <!-- Cookie banner -->
+  <div id="cookie-banner">
+    🍪 We use cookies to improve your experience.
+    <button id="cookie-accept" type="button">OK</button>
+  </div>
+
+  <!-- Support Modal -->
+  <div id="supportModal" class="backdrop" aria-hidden="true">
+    <div class="modal">
+      <button class="close" id="supportClose" type="button" aria-label="Close">×</button>
+      <h2>Support YouCanHeal</h2>
+      <p>Your support keeps this platform free 💛</p>
+
+      <div class="pill-row">
+        <button class="pill active" data-amt="2" type="button">£2 / month</button>
+        <button class="pill" data-amt="5" type="button">£5 / month</button>
+      </div>
+
+      <div id="paypal-button-container"></div>
+    </div>
+  </div>
+
+  <!-- Contact Modal -->
+  <div id="contactModal" class="backdrop" aria-hidden="true">
+    <div class="modal">
+      <button class="close" id="contactClose" type="button" aria-label="Close">×</button>
+      <h2>Contact YouCanHeal</h2>
+      <p>We reply within 2 working days.</p>
+      <p>
+        📩 Email:
+        <a style="color:#c4b5fd" href="mailto:youcanheal@youcanheal.co.uk">youcanheal@youcanheal.co.uk</a>
+      </p>
+    </div>
+  </div>
+
+  <!-- Load ONLY these modules -->
+  <script type="module" src="supabaseHelper.js"></script>
   <script type="module" src="app.js"></script>
 </body>
 </html>
